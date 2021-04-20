@@ -9,7 +9,9 @@ class ServerController extends Controller
     public function index()
     {
         $view_params = [];
-        $view_params['test'] =  "";
+        $view_params['test'] = "";
+        $view_params['this_year'] = date("Y");
+
         return view('index', compact('view_params'));
     }
 
@@ -17,11 +19,12 @@ class ServerController extends Controller
     {
 	    // $contents = json_encode($request->get('contents'));
         $view_params = [];
+        $view_params['this_year'] = date("Y");
 	    
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://localhost:8202/predict/",
+            CURLOPT_URL => "http://localhost:8201/predict/",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "UTF-8",
             CURLOPT_MAXREDIRS => 10,
@@ -47,5 +50,14 @@ class ServerController extends Controller
         }
 
         return view('index', compact('view_params'));
+    }
+
+    public function bot()
+    {
+        $view_params = [];
+        $view_params['test'] = "";
+        $view_params['this_year'] = date("Y");
+
+        return view('bot', compact('view_params'));
     }
 }
