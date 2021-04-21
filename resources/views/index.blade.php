@@ -14,11 +14,11 @@
             <div class="panel panel-default">
 
                 <div class="col-md-12">
-                    <form method="post" action="{{url('/house')}}" accept-charset="utf8">
+                    <form type="post" id="submit-form" >
                         {{ csrf_field() }} 
                         <div class="form-group">
-                            <label for=""> 주소 </label>
-                            <select id="address" class="form-control">
+                            <label for="address"> 주소 </label>
+                            <select name="address" class="form-control">
                                 <option value="0" selected>世田谷区</option>
                                 <option value="1">中央区</option>
                                 <option value="2">中野区</option>
@@ -46,43 +46,80 @@
                         </div>
                         <div class="form-group row justify-content-center">
                             <div class="form-group col-md-3">
-                                <label for="">역까지 거리 (분)</label>
-                                <input type="number" class="form-control" id="" placeholder="1~12" required>
+                                <label for="dis_to_station">역까지 거리 (분)</label>
+                                <input type="number" class="form-control" name="dis_to_station" placeholder="1~12" min="1" max="12" required>
                             </div>
                             <div class="form-group col-md-3">
-                                <label for="">건축일</label>
-                                <input type="number" class="form-control" id="" placeholder="1990~{{$view_params['this_year']}}" required>
+                                <label for="year_of_cons">건축일</label>
+                                <input type="number" class="form-control" name="year_of_cons" placeholder="1990~{{$view_params['this_year']}}" min="1990" max="{{$view_params['this_year']}}" required>
                             </div>
                             <div class="form-group col-md-3">
-                                <label for="">방 면적 (m<sup>2</sup>)</label>
-                                <input type="number" class="form-control" id="" placeholder="15~50" required>
+                                <label for="area">방 면적 (m<sup>2</sup>)</label>
+                                <input type="number" class="form-control" name="area" placeholder="15~50" min="15" max="50" required>
                             </div>
                             <div class="form-group col-md-3">
-                                <label for="">층수</label>
-                                <input type="number" class="form-control" id="" placeholder="1~15" required>
+                                <label for="floors">층수</label>
+                                <input type="number" class="form-control" name="floors" placeholder="1~15" min="1" max="15" required>
                             </div>
 
                         </div>
 
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="">
-                                <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="separ_toilet" name="separ_toilet">
+                                <label class="form-check-label" for="separ_toilet">
                                     화장실 별도
                                 </label>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <button type="submit" class="btn btn-primary">
-                            예상 집 값		
-                        </button>
+                        <input type='submit' id="btn" class="btn btn-primary" value="예상 집 값">
                     </form>
                 </div>
-
-                {{$view_params['test']}}
 
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function($) {
+        $(document).on('submit', '#submit-form', function(event) {
+            event.preventDefault();
+            $('#btn').prop('disabled', true);
+            var address = $('select[name=address]').val();
+            var dis_to_station = $('input[name=dis_to_station]').val();
+            var year_of_cons = $('input[name=year_of_cons]').val();
+            var floors = $('input[name=floors]').val();
+            var area = $('input[name=area]').val();
+            var _token = $('input[name=_token]').val();
+
+            var form = new FormData();
+            form.append("dis_to_station", dis_to_station);
+            form.append("year_of_cons", year_of_cons);
+            form.append("floors", floors);
+            form.append("area", area);
+            form.append("address", address);
+
+            var settings = {
+                "url": "http://localhost:8200/predict/house",
+                "method": "POST",
+                "timeout": 0,
+                "processData": false,
+                "mimeType": "multipart/form-data",
+                "contentType": false,
+                "data": form,
+                "headers": {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+            };
+
+            $.ajax(settings).done(function (response) {
+                alert(response);
+                $('#btn').prop('disabled', false);
+            });
+        });
+    });
+
+</script>
 @endsection

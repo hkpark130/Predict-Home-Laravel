@@ -17,14 +17,6 @@
                     개발중
                 </div>
 
-                <form method="post" action="{{url('/house')}}" accept-charset="utf8">
-                    {{ csrf_field() }} 
-                    <button type="submit" class="btn btn-primary">
-                        Python 테스트		
-                    </button>
-                </form>
-
-                {{$view_params['test']}}
 
             </div>
         </div>
