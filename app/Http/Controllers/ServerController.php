@@ -56,6 +56,8 @@ class ServerController extends Controller
 
         if(!isset($response)){
             $response =  "통신 실패";
+        } else{
+            $response = $response ."円";
         }
 
         return $response;
