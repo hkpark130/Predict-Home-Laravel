@@ -15,4 +15,5 @@ use App\Http\Controllers\ServerController;
 */
 
 Route::get('/', [ServerController::class, 'index']);
-Route::post('/house', [ServerController::class, 'house']);
+Route::get('/bot', [ServerController::class, 'bot']);
+Route::post('/predict/house', [ServerController::class, 'house']);
