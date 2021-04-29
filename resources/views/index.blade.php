@@ -80,46 +80,17 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script>
-    $(document).ready(function($) {
-        $(document).on('submit', '#submit-form', function(event) {
-            event.preventDefault();
-            $('#btn').prop('disabled', true);
-            var address = $('select[name=address]').val();
-            var dis_to_station = $('input[name=dis_to_station]').val();
-            var year_of_cons = $('input[name=year_of_cons]').val();
-            var floors = $('input[name=floors]').val();
-            var area = $('input[name=area]').val();
-            var _token = $('input[name=_token]').val();
-
-            var form = new FormData();
-            form.append("dis_to_station", dis_to_station);
-            form.append("year_of_cons", year_of_cons);
-            form.append("floors", floors);
-            form.append("area", area);
-            form.append("address", address);
-
-            var settings = {
-                "url": "http://localhost:8200/predict/house",
-                "method": "POST",
-                "timeout": 0,
-                "processData": false,
-                "mimeType": "multipart/form-data",
-                "contentType": false,
-                "data": form,
-                "headers": {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-            };
-
-            $.ajax(settings).done(function (response) {
-                alert(response);
-                $('#btn').prop('disabled', false);
-            });
-        });
-    });
-
-</script>
 @endsection
