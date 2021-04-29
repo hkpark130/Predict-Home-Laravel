@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\SimpleHttpClient;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Redis;
 
 class ServerController extends Controller
 {
+    private $api;
+
     public function index()
     {
         $view_params = [];
-        $view_params['test'] = "";
         $view_params['this_year'] = date("Y");
 
         return view('index', compact('view_params'));
@@ -17,6 +21,7 @@ class ServerController extends Controller
 
     public function house(Request $request)
     {
+        $api = new SimpleHttpClient;
         $address = $request->get('address');
 	    $dis_to_station = $request->get('dis_to_station');
         $year_of_cons = $request->get('year_of_cons');
@@ -24,41 +29,33 @@ class ServerController extends Controller
         $floors = $request->get('floors');
         // $separ_toilet = is_null($request->get('separ_toilet')) ? '0' : '1';
         // 크롤링한 데이터가 다 "화장실 별도" 라서 의미가 없음
+        $md5_key = md5(json_encode($request->all()));
 
-        $curl = curl_init();
-        $data = json_encode(array(
+        $param = array(
                     "dis_to_station"=>$dis_to_station,
                     "year_of_cons"=>$year_of_cons,
                     "floors"=>$floors,
                     "separ_toilet"=>0,
                     "area"=>$area,
                     "address"=>$address
-                ));
-                
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://localhost:8201/predict/house/",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "UTF-8",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            // CURLOPT_POSTFIELDS => $data,
-            CURLOPT_HTTPHEADER => array(
-                "Content-Type: application/x-www-form-urlencoded",
-                "cache-control: no-cache",
-                "data: $data"
-            )
-        ));
+                );
+        
+        try { //캐쉬에 있는지 확인
+            $redis_value = Redis::hGetAll($md5_key);
 
-        curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
-        $response = curl_exec($curl);
-
-        if(!isset($response)){
-            $response =  "통신 실패";
-        } else{
-            $response = $response ."円";
+            if(!empty($redis_value)) {
+                $response = $redis_value["value"];
+            } else{
+                $response = $api->apiRequest('GET', '/predict/house/', $param);
+            }
+            $request->merge(['value' => $response]);
+            
+        } catch (\Exception $e){
+            return response::make(\GuzzleHttp\json_encode(["error_message" => $e->getMessage()]));
         }
+        
+        // return response::make($response);
+        $response = (string)$response ."円";
 
         return $response;
     }
